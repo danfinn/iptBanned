@@ -33,6 +33,13 @@ func getBanned(ipt *iptables.IPTables) []string {
 }
 
 func showBanned(res http.ResponseWriter, req *http.Request) {
+        ipt, err := iptables.New()
+        if err != nil {
+                log.Fatal("Unable to connect to iptables")
+        }
+
+        f2bRules = getBanned(ipt)
+
 	tpl, err := template.ParseFiles("banned.gohtml")
 	if err != nil {
 		log.Fatalln(err)
@@ -45,12 +52,12 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	ipt, err := iptables.New()
-	if err != nil {
-		log.Fatal("Unable to connect to iptables")
-	}
+//	ipt, err := iptables.New()
+//	if err != nil {
+//		log.Fatal("Unable to connect to iptables")
+//	}
 
-	f2bRules = getBanned(ipt)
+//	f2bRules = getBanned(ipt)
 
 	http.HandleFunc("/", showBanned)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
