@@ -5,7 +5,9 @@ Enabling other users to see which hosts are currently banned in IPTables.  We ha
 iptBanned needs to be run as root because it needs access to iptables
 
 By default iptBanned runs on port 8080 but you can change this using the -p flag:
+
 ```./iptBanned -p 80```
 
 By default iptBanned gets the list of blocked IPs from the f2b-SSH chain which is generally what fail2ban uses however this can be changed with the -c flag:
+
 ```./iptBanned -c iptables-chain```
