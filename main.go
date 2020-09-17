@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"flag"
 	"fmt"
 	"github.com/coreos/go-iptables/iptables"
 	"html/template"
@@ -8,24 +10,20 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
-	"flag"
 )
 
 var chain string
 
-func getBanned(ipt *iptables.IPTables) []string {
+func getBanned(ipt *iptables.IPTables) ([]string, error) {
+	var ips []string
 	rules, err := ipt.List("filter", chain)
 	if err != nil {
-		// Return error so that showBanned can gracefully serve 500 error
-		var e []string
 		fmt.Printf("List of %v chain failed failed: %v", chain, err)
-		e = append(e, "error")
-		return e
+		return ips, errors.New("getBanned unable to lookup iptables chain")
 	}
 
 	// Strip out IP addresses from iptables output
 	re := regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
-	var ips []string
 	for _, v := range rules {
 		rule := re.FindString(v)
 		if rule != "" {
@@ -34,28 +32,27 @@ func getBanned(ipt *iptables.IPTables) []string {
 	}
 
 	sort.Strings(ips)
-	return ips
+	return ips, nil
 }
 
 func showBanned(res http.ResponseWriter, req *http.Request) {
-        ipt, err := iptables.New()
-        if err != nil {
-                log.Fatal("Unable to connect to iptables")
-        }
+	ipt, err := iptables.New()
+	if err != nil {
+		log.Fatal("Unable to connect to iptables")
+	}
 
-        f2bRules := getBanned(ipt)
-	// Check for error retrieving iptables chain info
-	if f2bRules[0] == "error" {
+	f2bRules, err := getBanned(ipt)
+	if err != nil {
 		http.Error(res, "Unable to list IPTables chain", 500)
 	} else {
 		tpl, err := template.ParseFiles("/usr/local/iptBanned/banned.gohtml")
 		if err != nil {
-			log.Fatalln(err)
+			http.Error(res, "Unable to parse html template", 500)
 		}
 
 		err = tpl.Execute(res, f2bRules)
 		if err != nil {
-			log.Fatalln(err)
+			http.Error(res, "Unable to execute html template", 500)
 		}
 	}
 }
