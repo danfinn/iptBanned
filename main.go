@@ -8,14 +8,16 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"flag"
 )
 
 var f2bRules []string
+var chain string
 
 func getBanned(ipt *iptables.IPTables) []string {
-	f2bRules, err := ipt.List("filter", "f2b-SSH")
+	f2bRules, err := ipt.List("filter", chain)
 	if err != nil {
-		fmt.Printf("List of f2b-SSH chain failed failed: %v", err)
+		fmt.Printf("List of %v chain failed failed: %v", chain, err)
 	}
 
 	// Strip out IP addresses from iptables output
@@ -52,7 +54,13 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	// Handle CLI arguments
+	var port string
+	flag.StringVar(&port, "p", "8080", "Port to listen on")
+	flag.StringVar(&chain, "c", "f2b-SSH", "IPTables Chain to display")
+	flag.Parse()
+
 	http.HandleFunc("/", showBanned)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/usr/local/iptBanned/static"))))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+port, nil)
 }
