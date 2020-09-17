@@ -40,7 +40,7 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 
         f2bRules = getBanned(ipt)
 
-	tpl, err := template.ParseFiles("banned.gohtml")
+	tpl, err := template.ParseFiles("/usr/local/iptBanned/banned.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -52,14 +52,7 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-//	ipt, err := iptables.New()
-//	if err != nil {
-//		log.Fatal("Unable to connect to iptables")
-//	}
-
-//	f2bRules = getBanned(ipt)
-
 	http.HandleFunc("/", showBanned)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/usr/local/iptBanned/static"))))
 	http.ListenAndServe(":8080", nil)
 }
