@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"time"
 )
 
 var chain string
@@ -41,6 +42,9 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 		log.Fatal("Unable to connect to iptables")
 	}
 
+	// Log some request info
+	fmt.Printf("%v Req: %s %s\n", time.Now().Format(time.RFC3339), req.RemoteAddr, req.URL)
+
 	f2bRules, err := getBanned(ipt)
 	if err != nil {
 		http.Error(res, "Unable to list IPTables chain", 500)
@@ -63,6 +67,8 @@ func main() {
 	flag.StringVar(&port, "p", "8080", "Port to listen on")
 	flag.StringVar(&chain, "c", "f2b-SSH", "IPTables Chain to display")
 	flag.Parse()
+
+	fmt.Printf("iptBanned listening on port %v\n\n", port)
 
 	http.HandleFunc("/", showBanned)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/usr/local/iptBanned/static"))))
