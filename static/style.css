@@ -1,17 +1,30 @@
 body {
   padding-left: 1em;
-  font-family: Georgia, "Times New Roman",
-        Times, serif;
+  font-family: Tahoma, Verdana, Segoe, sans-serif;
   color: black;
-  background-color: LightGray }
+  background-color: LightGray;
+}
 h1 {
-  font-family: Helvetica, Geneva, Arial,
-        SunSans-Regular, sans-serif }
+  font-family: Tahoma, Verdana, Segoe, sans-serif;
+}
 a:link {
-  color: blue }
+  color: black;
+  text-decoration: none;
+}
 a:visited {
-  color: purple }
+  color: black;
+  text-decoration: none;
+}
+a:hover {
+  color: blue;
+  text-decoration: underline;
+}
+a:active {
+  color: red;
+  text-decoration: underline;
+}
 address {
   margin-top: 1em;
   padding-top: 1em;
-  border-top: thin dotted }
+  border-top: thin dotted;
+}
