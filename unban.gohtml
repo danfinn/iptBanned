@@ -1,0 +1,9 @@
+{{if .Success}}
+  <h1>IP was removed from the ban list</h1>
+{{else}}
+  <h1>Unban IP</h1>
+  <form method="POST">
+    <label>IP to unban:</label><br />
+    <input type="text" name="ip"><br />
+  </form>
+{{end}}

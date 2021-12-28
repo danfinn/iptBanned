@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"sort"
 	"time"
+	"os/exec"
 )
 
 var chain string
@@ -61,6 +62,25 @@ func showBanned(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func unbanIP (res http.ResponseWriter, req *http.Request) {
+	tpl, err := template.ParseFiles("/usr/local/iptBanned/unban.gohtml")
+	if err != nil {
+		http.Error(res, "Unable to parse html template", 500)
+	}
+
+	if req.Method != http.MethodPost {
+	  tpl.Execute(res, nil)
+	  return
+	}
+
+	ipaddr := req.FormValue("ip")
+	cmd := exec.Command("/usr/bin/fail2ban-client", "set", "sshd", "unbanip", ipaddr)
+	err = cmd.Run()
+
+	tpl.Execute(res, struct{ Success bool }{ true })
+
+}
+
 func main() {
 	// Handle CLI arguments
 	var port string
@@ -71,6 +91,7 @@ func main() {
 	fmt.Printf("iptBanned listening on port %v\n\n", port)
 
 	http.HandleFunc("/", showBanned)
+	http.HandleFunc("/unban", unbanIP)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("/usr/local/iptBanned/static"))))
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
