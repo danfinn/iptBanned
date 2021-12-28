@@ -77,7 +77,11 @@ func unbanIP (res http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("/usr/bin/fail2ban-client", "set", "sshd", "unbanip", ipaddr)
 	err = cmd.Run()
 
-	tpl.Execute(res, struct{ Success bool }{ true })
+	if err != nil {
+		http.Error(res, "Unable to remove IP, please contact DevOps", 500)
+	} else {
+		tpl.Execute(res, struct{ Success bool }{ true })
+	}
 
 }
 
